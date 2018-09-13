@@ -1,21 +1,26 @@
 {
-  "name": "react-intersection-observer",
-  "version": "6.2.3",
+  "name": "@kohlmannj/react-intersection-observer",
+  "version": "6.2.4",
   "description": "Monitor if a component is inside the viewport, using IntersectionObserver API",
   "main": "dist/react-intersection-observer.cjs.js",
   "jsnext:main": "dist/react-intersection-observer.esm.js",
   "module": "dist/react-intersection-observer.esm.js",
   "unpkg": "dist/react-intersection-observer.umd.min.js",
   "author": "Daniel Schmidt",
-  "typings": "index.d.ts",
+  "maintainers": [
+    "Joseph Kohlmann <kohlmannj@mac.com>"
+  ],
+  "types": "dist/index.d.ts",
   "files": [
     "dist/*",
-    "src/*",
-    "index.d.ts"
+    "src/*"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/thebuilder/react-intersection-observer.git"
+    "url": "https://github.com/kohlmannj/react-intersection-observer.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "license": "MIT",
   "keywords": [
@@ -26,6 +31,7 @@
     "inview"
   ],
   "prettier": {
+    "parser": "typescript",
     "singleQuote": true,
     "semi": false,
     "trailingComma": "all"
@@ -38,17 +44,17 @@
   ],
   "scripts": {
     "coveralls": "cat ./coverage/lcov.info | coveralls",
-    "build": "rm -rf dist && yarn run build:lib && yarn run build:flow",
+    "build": "rm -rf dist && yarn run build:lib && yarn run build:dts",
     "build:lib": "run-p rollup:*",
     "build:storybook": "build-storybook --output-dir example",
-    "build:flow": "node scripts/create-flow",
+    "build:dts": "tsc -p tsconfig.json --emitDeclarationOnly",
     "dev": "concurrently -k -r 'jest --watch' 'yarn run storybook'",
-    "lint": "eslint {src,stories,tests}/**/*.js ",
+    "lint": "tslint -p tsconfig.json {src,stories,tests}/.",
     "rollup:es": "rollup -c --environment FORMAT:es",
     "rollup:cjs": "rollup -c --environment FORMAT:cjs",
     "rollup:umd": "rollup -c --environment FORMAT:umd",
     "rollup:umd.min": "rollup -c --environment MINIFY,FORMAT:umd",
-    "precommit": "flow && lint-staged",
+    "precommit": "tsc --noEmit && lint-staged",
     "postcommit": "git update-index --again",
     "prepare": "yarn build",
     "pretty": "prettier '**/*.{js,md,json}' --write",
@@ -84,15 +90,13 @@
       "jest-setup.js"
     ]
   },
-  "dependencies": {
-    "invariant": "^2.2.4"
-  },
   "peerDependencies": {
-    "react": "^15.0.0 || ^16.0.0 || ^17.0.0"
+    "invariant": "^2.2.4",
+    "react": "^16.0.0 || ^17.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0",
-    "@babel/core": "^7.0.0",
+    "@babel/core": "^7.0.1",
     "@babel/plugin-external-helpers": "^7.0.0",
     "@babel/plugin-proposal-class-properties": "^7.0.0",
     "@babel/plugin-proposal-decorators": "^7.0.0",
@@ -106,16 +110,19 @@
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-flow": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
+    "@babel/preset-typescript": "^7.0.0",
     "@babel/runtime": "^7.0.0",
     "@storybook/addon-actions": "^3.4.10",
     "@storybook/addon-options": "^3.4.10",
     "@storybook/react": "^3.4.10",
+    "@types/invariant": "^2.2.29",
+    "@types/react": "^16.4.14",
     "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "^23.4.2",
+    "babel-jest": "^23.6.0",
     "concurrently": "4.0.1",
     "coveralls": "^3.0.2",
     "enzyme": "^3.6.0",
-    "enzyme-adapter-react-16": "^1.4.0",
+    "enzyme-adapter-react-16": "^1.5.0",
     "enzyme-to-json": "^3.3.4",
     "eslint": "^5.5.0",
     "eslint-config-insilico": "^5.2.0",
@@ -123,18 +130,21 @@
     "flow-copy-source": "^2.0.2",
     "husky": "^0.14.3",
     "intersection-observer": "^0.5.0",
-    "jest": "^23.5.0",
+    "jest": "^23.6.0",
     "lint-staged": "^7.2.2",
     "npm-run-all": "^4.1.3",
     "prettier": "^1.14.2",
-    "react": "^16.4.2",
-    "react-dom": "^16.4.2",
-    "react-test-renderer": "^16.4.2",
-    "rollup": "^0.65.0",
+    "react": "^16.5.0",
+    "react-dom": "^16.5.0",
+    "react-test-renderer": "^16.5.0",
+    "rollup": "^0.65.2",
     "rollup-plugin-babel": "^4.0.1",
     "rollup-plugin-commonjs": "^9.1.6",
-    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-node-resolve": "^3.4.0",
     "rollup-plugin-replace": "^2.0.0",
-    "rollup-plugin-uglify": "^5.0.2"
+    "rollup-plugin-uglify": "^5.0.2",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "typescript": "^3.0.3"
   }
 }

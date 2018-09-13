@@ -5,6 +5,8 @@ import replace from 'rollup-plugin-replace'
 import { uglify } from 'rollup-plugin-uglify'
 import pkg from './package.json'
 
+const nodeModulesGlob = 'node_modules/**'
+const extensions = ['.ts', '.tsx', '.js', '.jsx']
 const minify = process.env.MINIFY
 const format = process.env.FORMAT
 const es = format === 'es'
@@ -34,7 +36,7 @@ if (es) {
 
 export default [
   {
-    input: 'src/index.js',
+    input: 'src/index.ts',
     output: {
       name: 'ReactIntersectionObserver',
       globals: {
@@ -50,30 +52,23 @@ export default [
         ],
     plugins: [
       resolve({
+        extensions,
+        module: true,
         jsnext: true,
         main: true,
       }),
-      commonjs({ include: 'node_modules/**' }),
+      commonjs({ include: nodeModulesGlob }),
       babel({
-        exclude: 'node_modules/**',
-        externalHelpers: false,
-        presets: [
-          [
-            '@babel/preset-env',
-            {
-              loose: true,
-            },
-          ],
-        ],
+        exclude: nodeModulesGlob,
+        extensions,
       }),
-      umd
-        ? replace({
-            'process.env.NODE_ENV': JSON.stringify(
-              minify ? 'production' : 'development',
-            ),
-          })
-        : null,
-      minify ? uglify() : null,
+      umd &&
+        replace({
+          'process.env.NODE_ENV': JSON.stringify(
+            minify ? 'production' : 'development',
+          ),
+        }),
+      minify && uglify(),
     ].filter(Boolean),
   },
 ]

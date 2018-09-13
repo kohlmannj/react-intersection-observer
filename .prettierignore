@@ -2,3 +2,5 @@ dist/
 lib/
 example/
 package.json
+tsconfig.json
+tslint.json
