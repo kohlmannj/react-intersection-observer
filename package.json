@@ -48,7 +48,7 @@
     "build:lib": "run-p rollup:*",
     "build:storybook": "build-storybook --output-dir example",
     "build:dts": "tsc -p tsconfig.json --emitDeclarationOnly",
-    "dev": "concurrently -k -r 'jest --watch' 'yarn run storybook'",
+    "dev": "rm -rf dist && concurrently 'npm run rollup:es -- -w' 'npm run build:dts -- --watch'",
     "lint": "tslint -p tsconfig.json {src,stories,tests}/.",
     "rollup:es": "rollup -c --environment FORMAT:es",
     "rollup:cjs": "rollup -c --environment FORMAT:cjs",
