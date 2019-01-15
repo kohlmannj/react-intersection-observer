@@ -157,8 +157,6 @@ class Observer extends React.Component<
     }
 
     if (needsPolyfill() && this.props.importPolyfill) {
-      console.log('dynamically import()ing intersection-observer...')
-      debugger
       await import('intersection-observer') // tslint:disable-line no-implicit-dependencies
     }
 
