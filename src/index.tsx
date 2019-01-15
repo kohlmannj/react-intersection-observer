@@ -75,7 +75,7 @@ class Observer extends React.Component<
       )
     }
 
-    await this.importIntersectionObserverPolyfill()
+    await this.importPolyfill()
 
     if (this.props.forwardedRef.current) {
       this.observeNode()
@@ -86,7 +86,7 @@ class Observer extends React.Component<
     prevProps: IntersectionObserverProps,
     prevState: IntersectionObserverState,
   ) {
-    await this.importIntersectionObserverPolyfill()
+    await this.importPolyfill()
 
     // If a IntersectionObserver option changed, reinit the observer
     if (
@@ -151,12 +151,12 @@ class Observer extends React.Component<
     return <Fragment>{children}</Fragment>
   }
 
-  private async importIntersectionObserverPolyfill() {
+  private async importPolyfill() {
     if (this.state.intersectionObserverReady) {
       return
     }
 
-    if (needsPolyfill() && this.props.importPolyfill) {
+    if (this.props.importPolyfill && needsPolyfill()) {
       await import('intersection-observer') // tslint:disable-line no-implicit-dependencies
     }
 
