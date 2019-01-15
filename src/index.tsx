@@ -1,6 +1,7 @@
 import invariant from 'invariant'
-import React, { createRef, ReactNode, RefObject } from 'react'
+import React, { createRef, Fragment, ReactNode, RefObject } from 'react'
 import { observe, unobserve } from './intersection'
+import { needsPolyfill } from './needs-polyfill'
 
 export interface IntersectionObserverRenderProps {
   inView: boolean
@@ -30,10 +31,13 @@ export interface IntersectionObserverProps {
   rootId?: string
   /** Call this function whenever the in view state changes */
   onChange?: (inView: boolean) => void
+  /** Whether or not to dynamically `import()` the intersection-observer polyfill if needed */
+  importPolyfill?: boolean
 }
 
 export interface IntersectionObserverState {
   inView: boolean
+  intersectionObserverReady: boolean | undefined
 }
 
 /**
@@ -51,15 +55,17 @@ class Observer extends React.Component<
 > {
   public static defaultProps = {
     forwardedRef: createRef<any>(),
+    importPolyfill: false,
     threshold: 0,
     triggerOnce: false,
   }
 
   public state = {
     inView: false,
+    intersectionObserverReady: undefined,
   }
 
-  public componentDidMount() {
+  public async componentDidMount() {
     if (process.env.NODE_ENV !== 'production') {
       invariant(
         this.props.forwardedRef
@@ -69,15 +75,19 @@ class Observer extends React.Component<
       )
     }
 
+    await this.importIntersectionObserverPolyfill()
+
     if (this.props.forwardedRef.current) {
       this.observeNode()
     }
   }
 
-  public componentDidUpdate(
+  public async componentDidUpdate(
     prevProps: IntersectionObserverProps,
     prevState: IntersectionObserverState,
   ) {
+    await this.importIntersectionObserverPolyfill()
+
     // If a IntersectionObserver option changed, reinit the observer
     if (
       prevProps.rootMargin !== this.props.rootMargin ||
@@ -130,10 +140,29 @@ class Observer extends React.Component<
     const { inView } = this.state
 
     if (typeof children === 'function') {
-      return children({ inView, forwardedRef })
+      // Work around a breaking change in TypeScript function narrowing with a type cast
+      /** @see https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#narrowing-functions-now-intersects--object-and-unconstrained-generic-type-parameters */
+      return (children as IntersectionObserverRenderFunction)({
+        inView,
+        forwardedRef,
+      })
     }
 
-    return children
+    return <Fragment>{children}</Fragment>
+  }
+
+  private async importIntersectionObserverPolyfill() {
+    if (this.state.intersectionObserverReady) {
+      return
+    }
+
+    if (needsPolyfill() && this.props.importPolyfill) {
+      console.log('dynamically import()ing intersection-observer...')
+      debugger
+      await import('intersection-observer') // tslint:disable-line no-implicit-dependencies
+    }
+
+    this.setState({ intersectionObserverReady: true })
   }
 }
 

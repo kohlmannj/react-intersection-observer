@@ -34,9 +34,22 @@ if (es) {
   throw new Error('no format specified. --environment FORMAT:xxx')
 }
 
+const external = umd
+  ? [
+      ...Object.keys(pkg.optionalDependencies || {}),
+      ...Object.keys(pkg.peerDependencies || {}),
+    ]
+  : [
+      ...Object.keys(pkg.dependencies || {}),
+      ...Object.keys(pkg.optionalDependencies || {}),
+      ...Object.keys(pkg.peerDependencies || {}),
+    ]
+
+console.log(external)
+
 export default [
   {
-    input: 'src/index.ts',
+    input: 'src/index.tsx',
     output: {
       name: 'ReactIntersectionObserver',
       globals: {
@@ -47,12 +60,7 @@ export default [
     watch: {
       chokidar: true,
     },
-    external: umd
-      ? Object.keys(pkg.peerDependencies || {})
-      : [
-          ...Object.keys(pkg.dependencies || {}),
-          ...Object.keys(pkg.peerDependencies || {}),
-        ],
+    external,
     plugins: [
       resolve({
         extensions,
