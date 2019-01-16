@@ -1,7 +1,6 @@
 import invariant from 'invariant'
 import React, { createRef, Fragment, ReactNode, RefObject } from 'react'
 import { observe, unobserve } from './intersection'
-import { needsPolyfill } from './needs-polyfill'
 
 export interface IntersectionObserverRenderProps {
   inView: boolean
@@ -31,8 +30,6 @@ export interface IntersectionObserverProps {
   rootId?: string
   /** Call this function whenever the in view state changes */
   onChange?: (inView: boolean) => void
-  /** Whether or not to dynamically `import()` the intersection-observer polyfill if needed */
-  importPolyfill?: boolean
 }
 
 export interface IntersectionObserverState {
@@ -55,7 +52,6 @@ class Observer extends React.Component<
 > {
   public static defaultProps = {
     forwardedRef: createRef<any>(),
-    importPolyfill: false,
     threshold: 0,
     triggerOnce: false,
   }
@@ -75,34 +71,30 @@ class Observer extends React.Component<
       )
     }
 
-    this.importPolyfill().then(() => {
-      if (this.props.forwardedRef.current) {
-        this.observeNode()
-      }
-    })
+    if (this.props.forwardedRef.current) {
+      this.observeNode()
+    }
   }
 
   public componentDidUpdate(
     prevProps: IntersectionObserverProps,
     prevState: IntersectionObserverState,
   ) {
-    this.importPolyfill().then(() => {
-      // If a IntersectionObserver option changed, reinit the observer
-      if (
-        prevProps.rootMargin !== this.props.rootMargin ||
-        prevProps.forwardedRef.current !== this.props.forwardedRef.current ||
-        prevProps.threshold !== this.props.threshold
-      ) {
-        unobserve(this.props.forwardedRef.current)
-        this.observeNode()
-      }
+    // If a IntersectionObserver option changed, reinit the observer
+    if (
+      prevProps.rootMargin !== this.props.rootMargin ||
+      prevProps.forwardedRef.current !== this.props.forwardedRef.current ||
+      prevProps.threshold !== this.props.threshold
+    ) {
+      unobserve(this.props.forwardedRef.current)
+      this.observeNode()
+    }
 
-      if (prevState.inView !== this.state.inView) {
-        if (this.state.inView && this.props.triggerOnce) {
-          unobserve(this.props.forwardedRef.current)
-        }
+    if (prevState.inView !== this.state.inView) {
+      if (this.state.inView && this.props.triggerOnce) {
+        unobserve(this.props.forwardedRef.current)
       }
-    })
+    }
   }
 
   public componentWillUnmount() {
@@ -149,22 +141,6 @@ class Observer extends React.Component<
     }
 
     return <Fragment>{children}</Fragment>
-  }
-
-  private importPolyfill() {
-    if (this.state.intersectionObserverReady) {
-      return Promise.resolve()
-    }
-
-    if (this.props.importPolyfill && needsPolyfill()) {
-      // tslint:disable-next-line no-implicit-dependencies
-      return import('intersection-observer').then(() => {
-        this.setState({ intersectionObserverReady: true })
-      })
-    } else {
-      this.setState({ intersectionObserverReady: true })
-      return Promise.resolve()
-    }
   }
 }
 

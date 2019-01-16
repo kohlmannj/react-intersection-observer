@@ -35,13 +35,9 @@ if (es) {
 }
 
 const external = umd
-  ? [
-      ...Object.keys(pkg.optionalDependencies || {}),
-      ...Object.keys(pkg.peerDependencies || {}),
-    ]
+  ? Object.keys(pkg.peerDependencies || {})
   : [
       ...Object.keys(pkg.dependencies || {}),
-      ...Object.keys(pkg.optionalDependencies || {}),
       ...Object.keys(pkg.peerDependencies || {}),
     ]
 
