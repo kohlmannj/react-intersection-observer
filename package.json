@@ -31,7 +31,6 @@
     "inview"
   ],
   "prettier": {
-    "parser": "typescript",
     "singleQuote": true,
     "semi": false,
     "trailingComma": "all"

@@ -65,7 +65,7 @@ class Observer extends React.Component<
     intersectionObserverReady: undefined,
   }
 
-  public async componentDidMount() {
+  public componentDidMount() {
     if (process.env.NODE_ENV !== 'production') {
       invariant(
         this.props.forwardedRef
@@ -75,34 +75,34 @@ class Observer extends React.Component<
       )
     }
 
-    await this.importPolyfill()
-
-    if (this.props.forwardedRef.current) {
-      this.observeNode()
-    }
+    this.importPolyfill().then(() => {
+      if (this.props.forwardedRef.current) {
+        this.observeNode()
+      }
+    })
   }
 
-  public async componentDidUpdate(
+  public componentDidUpdate(
     prevProps: IntersectionObserverProps,
     prevState: IntersectionObserverState,
   ) {
-    await this.importPolyfill()
-
-    // If a IntersectionObserver option changed, reinit the observer
-    if (
-      prevProps.rootMargin !== this.props.rootMargin ||
-      prevProps.forwardedRef.current !== this.props.forwardedRef.current ||
-      prevProps.threshold !== this.props.threshold
-    ) {
-      unobserve(this.props.forwardedRef.current)
-      this.observeNode()
-    }
-
-    if (prevState.inView !== this.state.inView) {
-      if (this.state.inView && this.props.triggerOnce) {
+    this.importPolyfill().then(() => {
+      // If a IntersectionObserver option changed, reinit the observer
+      if (
+        prevProps.rootMargin !== this.props.rootMargin ||
+        prevProps.forwardedRef.current !== this.props.forwardedRef.current ||
+        prevProps.threshold !== this.props.threshold
+      ) {
         unobserve(this.props.forwardedRef.current)
+        this.observeNode()
       }
-    }
+
+      if (prevState.inView !== this.state.inView) {
+        if (this.state.inView && this.props.triggerOnce) {
+          unobserve(this.props.forwardedRef.current)
+        }
+      }
+    })
   }
 
   public componentWillUnmount() {
@@ -151,16 +151,20 @@ class Observer extends React.Component<
     return <Fragment>{children}</Fragment>
   }
 
-  private async importPolyfill() {
+  private importPolyfill() {
     if (this.state.intersectionObserverReady) {
-      return
+      return Promise.resolve()
     }
 
     if (this.props.importPolyfill && needsPolyfill()) {
-      await import('intersection-observer') // tslint:disable-line no-implicit-dependencies
+      // tslint:disable-next-line no-implicit-dependencies
+      return import('intersection-observer').then(() => {
+        this.setState({ intersectionObserverReady: true })
+      })
+    } else {
+      this.setState({ intersectionObserverReady: true })
+      return Promise.resolve()
     }
-
-    this.setState({ intersectionObserverReady: true })
   }
 }
 
