@@ -121,6 +121,10 @@ class Observer extends React.Component<
   }
 
   public handleChange = (inView: boolean) => {
+    if (!this.props.forwardedRef.current) {
+      return
+    }
+
     this.setState({ inView })
     if (this.props.onChange) {
       this.props.onChange(inView)
